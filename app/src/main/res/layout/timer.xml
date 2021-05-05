@@ -1,49 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.chauthai.swipereveallayout.SwipeRevealLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:id="@+id/timerSwipeRevealLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="16dp"
+    app:dragEdge="left"
+    app:mode="same_level">
 
-    <EditText
-        android:id="@+id/timerName"
+    <ImageView
+        android:id="@+id/deleteTimer"
         android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/design_default_color_error"
+        android:paddingHorizontal="16dp"
+        app:srcCompat="@drawable/outline_delete_24" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/timer_name_hint"
-        android:inputType="textPersonName"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@color/cardview_dark_background">
 
-    <NumberPicker
-        android:id="@+id/hours"
-        android:layout_width="wrap_content"
-        android:layout_height="120dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timerName" />
+        <TextView
+            android:id="@+id/timerName"
+            android:layout_width="0dp"
+            android:layout_height="32sp"
+            android:layout_marginStart="16dp"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toStartOf="@+id/time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <NumberPicker
-        android:id="@+id/minutes"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/hours"
-        app:layout_constraintStart_toEndOf="@+id/hours"
-        app:layout_constraintTop_toTopOf="@+id/hours" />
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toStartOf="@+id/pauseTimer"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <NumberPicker
-        android:id="@+id/seconds"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/hours"
-        app:layout_constraintStart_toEndOf="@+id/minutes"
-        app:layout_constraintTop_toTopOf="@+id/hours" />
+        <ProgressBar
+            android:id="@+id/timerProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:progressTint="@color/design_default_color_secondary_variant"
+            app:layout_constraintEnd_toStartOf="@+id/pauseTimer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/timerName" />
 
-    <Button
-        android:id="@+id/startStop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start_stop_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hours" />
+        <ImageView
+            android:id="@+id/pauseTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:background="@color/design_default_color_secondary_variant"
+            android:paddingHorizontal="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/outline_pause_24" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.chauthai.swipereveallayout.SwipeRevealLayout>

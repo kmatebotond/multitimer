@@ -1,23 +1,29 @@
 package hu.kmatebotond.multitimer;
 
 import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.NumberPicker;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.chauthai.swipereveallayout.SwipeRevealLayout;
+import com.chauthai.swipereveallayout.ViewBinderHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHolder> {
     private final Context context;
+    private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
+
     private final List<Timer> timers = new ArrayList<>();
 
     public TimerAdapter(Context context) {
@@ -37,53 +43,28 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
     public void onBindViewHolder(@NonNull TimerViewHolder holder, int position) {
         Timer timer = timers.get(position);
 
-        holder.getTimerName().setText(timer.getTimerName());
-        holder.getTimerName().addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        viewBinderHelper.bind(holder.timerSwipeRevealLayout, String.valueOf(System.identityHashCode(timer)));
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                timer.setTimerName(s.toString());
-            }
+        holder.deleteTimer.setOnClickListener(e -> {
+            timer.stopAndRemove(this);
         });
 
-        holder.getHours().setMinValue(Timer.MIN);
-        holder.getHours().setMaxValue(Timer.HOURS_MAX);
-        holder.getHours().setValue(timer.getHours());
-        holder.getHours().setOnValueChangedListener((picker, oldVal, newVal) -> {
-            timer.setHours(newVal);
-        });
+        holder.timerName.setText(timer.getTimerName());
+        holder.time.setText(Timer.convertToHoursMinutesSeconds(timer.getTotalSeconds()));
+        holder.timeProgressBar.setMax(timer.getMaxSeconds());
+        holder.timeProgressBar.setProgress(timer.getMaxSeconds() - timer.getTotalSeconds());
 
-        holder.getMinutes().setMinValue(Timer.MIN);
-        holder.getMinutes().setMaxValue(Timer.MINUTES_MAX);
-        holder.getMinutes().setValue(timer.getMinutes());
-        holder.getMinutes().setOnValueChangedListener((picker, oldVal, newVal) -> {
-            timer.setMinutes(newVal);
-        });
-
-        holder.getSeconds().setMinValue(Timer.MIN);
-        holder.getSeconds().setMaxValue(Timer.SECONDS_MAX);
-        holder.getSeconds().setValue(timer.getSeconds());
-        holder.getSeconds().setOnValueChangedListener((picker, oldVal, newVal) -> {
-            timer.setSeconds(newVal);
-        });
-
-        if (timer.isRunning()) {
-            holder.getStartStop().setText(R.string.stop);
-        } else {
-            holder.getStartStop().setText(R.string.start);
-        }
-        holder.getStartStop().setOnClickListener(e -> {
+        holder.pauseTimer.setOnClickListener(e -> {
             if (timer.isRunning()) {
-                timer.stop(this);
+                timer.stop();
             } else {
-                timer.start(this);
+                timer.start(context, this);
             }
         });
+
+        if (timer.isNeverStarted()) {
+            timer.start(context, this);
+        }
     }
 
     @Override
@@ -96,34 +77,22 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
     }
 
     public class TimerViewHolder extends RecyclerView.ViewHolder {
-        private final EditText timerName;
-        private final NumberPicker hours, minutes, seconds;
-        private final Button startStop;
+        private final SwipeRevealLayout timerSwipeRevealLayout;
+        private final ImageView deleteTimer;
+        private final TextView timerName, time;
+        private final ProgressBar timeProgressBar;
+        private final ImageView pauseTimer;
 
         public TimerViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            timerSwipeRevealLayout = itemView.findViewById(R.id.timerSwipeRevealLayout);
+            deleteTimer = itemView.findViewById(R.id.deleteTimer);
             timerName = itemView.findViewById(R.id.timerName);
-            hours = itemView.findViewById(R.id.hours);
-            minutes = itemView.findViewById(R.id.minutes);
-            seconds = itemView.findViewById(R.id.seconds);
-            startStop = itemView.findViewById(R.id.startStop);
-        }
-
-        public EditText getTimerName() {
-            return timerName;
-        }
-        public NumberPicker getHours() {
-            return hours;
-        }
-        public NumberPicker getMinutes() {
-            return minutes;
-        }
-        public NumberPicker getSeconds() {
-            return seconds;
-        }
-        public Button getStartStop() {
-            return startStop;
+            time = itemView.findViewById(R.id.time);
+            timeProgressBar = itemView.findViewById(R.id.timerProgressBar);
+            timeProgressBar.setMin(0);
+            pauseTimer = itemView.findViewById(R.id.pauseTimer);
         }
     }
 }
