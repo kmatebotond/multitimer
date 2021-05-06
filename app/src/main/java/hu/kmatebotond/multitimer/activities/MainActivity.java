@@ -1,17 +1,19 @@
-package hu.kmatebotond.multitimer;
+package hu.kmatebotond.multitimer.activities;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.media.AudioAttributes;
-import android.media.RingtoneManager;
 import android.os.Bundle;
-import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import hu.kmatebotond.multitimer.R;
+import hu.kmatebotond.multitimer.timer.TimerAdapter;
+import hu.kmatebotond.multitimer.timer.data.Timer;
+import hu.kmatebotond.multitimer.timer.data.TimerData;
 
 public class MainActivity extends AppCompatActivity {
     public static final String NOTIFICATION_CHANNEL_ID = MainActivity.class.toString();
@@ -19,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int SET_TIMER_REQUEST_CODE = 1;
 
     private RecyclerView timers;
+    private TimerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,14 +30,9 @@ public class MainActivity extends AppCompatActivity {
 
         createNotificationChannel();
 
-        Button addTimer = findViewById(R.id.addTimer);
-        addTimer.setOnClickListener(e -> {
-            Intent intent = new Intent(this, SetTimerActivity.class);
-            startActivityForResult(intent, SET_TIMER_REQUEST_CODE);
-        });
-
         timers = findViewById(R.id.timers);
-        timers.setAdapter(new TimerAdapter(this));
+        adapter = new TimerAdapter(this);
+        timers.setAdapter(adapter);
         timers.setLayoutManager(new LinearLayoutManager(this));
     }
 
@@ -44,13 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == SET_TIMER_REQUEST_CODE) {
             if (resultCode == SetTimerActivity.SET_TIMER_RESULT_CODE) {
-                String timerName = data.getExtras().getString(SetTimerActivity.SET_TIMER_TIMER_NAME);
-                int totalSeconds = data.getExtras().getInt(SetTimerActivity.SET_TIMER_TOTAL_SECONDS);
-
-                TimerAdapter adapter = (TimerAdapter) timers.getAdapter();
-                adapter.getTimers().add(new Timer(timerName, totalSeconds));
-
-                adapter.notifyDataSetChanged();
+                TimerData timerData = (TimerData) data.getExtras().getSerializable(SetTimerActivity.TIMER_DATA);
+                adapter.getTimers().add(new Timer(timerData, this, adapter));
             }
         }
     }
@@ -59,14 +52,12 @@ public class MainActivity extends AppCompatActivity {
         NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getResources().getString(R.string.app_name), NotificationManager.IMPORTANCE_HIGH);
         notificationChannel.setDescription(getResources().getString(R.string.app_name));
 
-        AudioAttributes.Builder audioAttributesBuilder = new AudioAttributes.Builder();
-        audioAttributesBuilder.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION);
-        audioAttributesBuilder.setUsage(AudioAttributes.USAGE_NOTIFICATION);
-
-        notificationChannel.setSound(RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM), audioAttributesBuilder.build());
-        notificationChannel.setVibrationPattern(new long[] {0, 500, 500, 500, 500, 500, 500, 500, 500});
-
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(notificationChannel);
+    }
+
+    public void startSetTimerActivityForResult() {
+        Intent intent = new Intent(this, SetTimerActivity.class);
+        startActivityForResult(intent, SET_TIMER_REQUEST_CODE);
     }
 }

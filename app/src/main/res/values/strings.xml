@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">MultiTimer</string>
-    <string name="add_timer_text">Add new timer</string>
-    <string name="set_timer_text_text">Set your timer</string>
-    <string name="set_timer_name_hint">Name your timer</string>
+    <string name="set_timer_name_hint">Timer name</string>
     <string name="separator_text">:</string>
-    <string name="set_timer_text">OK</string>
     <string name="timer_finished">Timer finished!</string>
 </resources>
