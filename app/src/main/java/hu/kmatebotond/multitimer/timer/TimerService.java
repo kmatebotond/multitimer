@@ -22,6 +22,7 @@ public class TimerService extends Service {
     public static final String TIMER_DATAS = "timer_datas";
 
     private final List<Timer> timers = new ArrayList<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -41,6 +42,20 @@ public class TimerService extends Service {
         return null;
     }
 
+    private void sendUpdateBroadcast() {
+        Intent intent = new Intent();
+        intent.setAction(UPDATE_ACTION);
+
+        List<TimerData> timerDatas = new ArrayList<>();
+        for (Timer t : timers) {
+            timerDatas.add(t.getTimerData());
+        }
+
+        intent.putExtra(TIMER_DATAS, (Serializable) timerDatas);
+
+        sendBroadcast(intent);
+    }
+
     private Notification getCorrectTimerNotification(Context context, TimerData timerData) {
         Notification notification;
         if (timers.size() > 1) {
@@ -56,20 +71,6 @@ public class TimerService extends Service {
         if (timers.isEmpty()) {
             stopForeground(true);
         }
-    }
-
-    private void sendUpdateBroadcast() {
-        Intent intent = new Intent();
-        intent.setAction(UPDATE_ACTION);
-
-        List<TimerData> timerDatas = new ArrayList<>();
-        for (Timer t : timers) {
-            timerDatas.add(t.getTimerData());
-        }
-
-        intent.putExtra(TIMER_DATAS, (Serializable) timerDatas);
-
-        sendBroadcast(intent);
     }
 
     public class Receiver extends BroadcastReceiver {
