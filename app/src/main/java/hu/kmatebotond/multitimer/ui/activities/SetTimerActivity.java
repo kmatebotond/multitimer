@@ -1,4 +1,4 @@
-package hu.kmatebotond.multitimer.activities;
+package hu.kmatebotond.multitimer.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import hu.kmatebotond.multitimer.R;
-import hu.kmatebotond.multitimer.timer.data.Timer;
-import hu.kmatebotond.multitimer.timer.data.TimerData;
+import hu.kmatebotond.multitimer.timer.Timer;
+import hu.kmatebotond.multitimer.timer.TimerData;
 
 public class SetTimerActivity extends AppCompatActivity {
     public static final int SET_TIMER_RESULT_CODE = 1;
@@ -55,7 +55,7 @@ public class SetTimerActivity extends AppCompatActivity {
 
             if (totalSeconds != 0) {
                 Intent intent = new Intent();
-                intent.putExtra(TIMER_DATA, new TimerData(setTimerName.getText().toString(), totalSeconds, totalSeconds));
+                intent.putExtra(TIMER_DATA, new TimerData(setTimerName.getText().toString(), totalSeconds, totalSeconds, false));
 
                 setResult(SET_TIMER_RESULT_CODE, intent);
             }
