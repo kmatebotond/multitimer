@@ -38,7 +38,7 @@ public class Notifications {
 
     public static Notification getTimerNotification(Context context, TimerData timerData) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, TIMER_NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(R.drawable.baseline_access_alarm_24);
+        builder.setSmallIcon(R.drawable.outline_access_alarm_24);
         if (timerData == null) {
             builder.setContentTitle(context.getResources().getString(R.string.multiple_timers_notification_title));
         } else {
@@ -65,7 +65,7 @@ public class Notifications {
         String time = Timer.convertToHoursMinutesSeconds(timerData.getMaxSeconds());
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, TIMER_FINISHED_NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(R.drawable.baseline_access_alarm_24);
+        builder.setSmallIcon(R.drawable.outline_access_alarm_24);
         builder.setContentTitle((timerName.equals("") ? "" : (timerName + " - ")) + time);
         builder.setContentText(context.getResources().getString(R.string.timer_finished));
 
