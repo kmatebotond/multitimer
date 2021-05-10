@@ -12,13 +12,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import hu.kmatebotond.multitimer.R;
-import hu.kmatebotond.multitimer.timer.Timer;
 import hu.kmatebotond.multitimer.timer.TimerData;
 import hu.kmatebotond.multitimer.timer.TimerService;
 
 public class Notifications {
-    public static final String TIMER_NOTIFICATION_CHANNEL_ID = "timer_notification_channel_id";
-    public static final String TIMER_FINISHED_NOTIFICATION_CHANNEL_ID = "timer_finished_notification_channel_id";
+    public static final String TIMER_NOTIFICATION_CHANNEL_ID = "Notifications.TIMER_NOTIFICATION_CHANNEL_ID";
+    public static final String TIMER_FINISHED_NOTIFICATION_CHANNEL_ID = "Notifications.TIMER_FINISHED_NOTIFICATION_CHANNEL_ID";
 
     public static final int TIMER_NOTIFICATION_ID = 1;
     public static final int TIMER_FINISHED_NOTIFICATION_ID = 2;
@@ -38,18 +37,19 @@ public class Notifications {
 
     public static Notification getTimerNotification(Context context, TimerData timerData) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, TIMER_NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(R.drawable.outline_access_alarm_24);
+        builder.setSmallIcon(R.drawable.outline_hourglass_bottom_24);
+
         if (timerData == null) {
             builder.setContentTitle(context.getResources().getString(R.string.multiple_timers_notification_title));
         } else {
-            builder.setContentTitle(Timer.convertToHoursMinutesSeconds(timerData.getTotalSeconds()));
+            builder.setContentTitle(timerData.getFormattedTotalSeconds());
             builder.setContentText(timerData.getTimerName());
 
-            Intent deleteTimerIntent = new Intent();
-            deleteTimerIntent.setAction(TimerService.Receiver.DELETE_TIMER_ACTION);
-            PendingIntent deleteTimerPendingIntent = PendingIntent.getBroadcast(context, 0, deleteTimerIntent, 0);
-
-            builder.addAction(R.drawable.outline_delete_24, context.getResources().getString(R.string.delete_timer_action_text), deleteTimerPendingIntent);
+            Intent deleteTimerActionIntent = new Intent();
+            deleteTimerActionIntent.setAction(TimerService.DELETE_TIMER_ACTION);
+            deleteTimerActionIntent.putExtra(TimerService.TIMER_INDEX_EXTRA, 0);
+            PendingIntent deleteTimerActionPendingIntent = PendingIntent.getBroadcast(context, 0, deleteTimerActionIntent, 0);
+            builder.addAction(R.drawable.outline_delete_24, context.getResources().getString(R.string.delete_timer_action_text), deleteTimerActionPendingIntent);
         }
 
         return builder.build();
@@ -61,12 +61,13 @@ public class Notifications {
     }
 
     public static void sendTimerFinishedNotification(Context context, TimerData timerData) {
-        String timerName = timerData.getTimerName();
-        String time = Timer.convertToHoursMinutesSeconds(timerData.getMaxSeconds());
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, TIMER_FINISHED_NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(R.drawable.outline_access_alarm_24);
-        builder.setContentTitle((timerName.equals("") ? "" : (timerName + " - ")) + time);
+        builder.setSmallIcon(R.drawable.outline_hourglass_bottom_24);
+
+        String timerName = timerData.getTimerName();
+        String maxSeconds = timerData.getFormattedMaxSeconds();
+        builder.setContentTitle((timerName.isEmpty() ? "" : (timerName + " - ")) + maxSeconds);
+        
         builder.setContentText(context.getResources().getString(R.string.timer_finished));
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);

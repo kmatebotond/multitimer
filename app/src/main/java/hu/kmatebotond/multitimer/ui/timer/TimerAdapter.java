@@ -1,9 +1,7 @@
 package hu.kmatebotond.multitimer.ui.timer;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,29 +20,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.kmatebotond.multitimer.R;
+import hu.kmatebotond.multitimer.timer.Timer;
 import hu.kmatebotond.multitimer.timer.TimerData;
 import hu.kmatebotond.multitimer.timer.TimerService;
 import hu.kmatebotond.multitimer.ui.activities.MainActivity;
-import hu.kmatebotond.multitimer.timer.Timer;
 import hu.kmatebotond.multitimer.ui.activities.SetTimerActivity;
 
 public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int TIMER_VIEW_TYPE = 1;
     public static final int ADD_TIMER_VIEW_TYPE = 2;
 
+    private List<TimerData> timerDatas = new ArrayList<>();
+
     private final Context context;
 
     private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
 
-    private List<TimerData> timerDatas = new ArrayList<>();
-
     public TimerAdapter(Context context) {
         this.context = context;
 
-        Receiver receiver = new Receiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(TimerService.UPDATE_ACTION);
-        context.registerReceiver(receiver, filter);
+        Intent requestUpdateAllActionIntent = new Intent();
+        requestUpdateAllActionIntent.setAction(TimerService.REQUEST_UPDATE_ALL_ACTION);
+        context.sendBroadcast(requestUpdateAllActionIntent);
     }
 
     @NonNull
@@ -54,11 +51,9 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         if (viewType == TIMER_VIEW_TYPE) {
             View view = inflater.inflate(R.layout.timer, parent, false);
-
             return new TimerViewHolder(view);
         } else if (viewType == ADD_TIMER_VIEW_TYPE) {
             View view = inflater.inflate(R.layout.add_timer, parent, false);
-
             return new AddTimerViewHolder(view);
         }
 
@@ -69,17 +64,15 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof TimerViewHolder) {
             TimerViewHolder timerViewHolder = (TimerViewHolder) holder;
-
             TimerData timerData = timerDatas.get(position);
 
             viewBinderHelper.bind(timerViewHolder.timerSwipeRevealLayout, timerData.getId() + "");
 
             timerViewHolder.deleteTimer.setOnClickListener(e -> {
-                Intent intent = new Intent();
-                intent.setAction(TimerService.Receiver.DELETE_TIMER_ACTION);
-                intent.putExtra(TimerService.Receiver.DELETE_TIMER_ACTION_INDEX, position);
-
-                context.sendBroadcast(intent);
+                Intent deleteTimerActionIntent = new Intent();
+                deleteTimerActionIntent.setAction(TimerService.DELETE_TIMER_ACTION);
+                deleteTimerActionIntent.putExtra(TimerService.TIMER_INDEX_EXTRA, timerDatas.indexOf(timerData));
+                context.sendBroadcast(deleteTimerActionIntent);
             });
 
             if (timerData.isRunning()) {
@@ -89,22 +82,21 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
 
             timerViewHolder.timerName.setText(timerData.getTimerName());
-            timerViewHolder.time.setText(Timer.convertToHoursMinutesSeconds(timerData.getTotalSeconds()));
-            timerViewHolder.timeProgressBar.setMax(timerData.getMaxSeconds());
+            timerViewHolder.time.setText(timerData.getFormattedTotalSeconds());
+            timerViewHolder.timeProgressBar.setMax(timerData.getMaxSeconds() - 1);
             timerViewHolder.timeProgressBar.setProgress(timerData.getMaxSeconds() - timerData.getTotalSeconds());
 
             timerViewHolder.pauseTimer.setOnClickListener(e -> {
-                Intent intent = new Intent();
+                Intent startPauseTimerActionIntent = new Intent();
 
                 if (timerData.isRunning()) {
-                    intent.setAction(TimerService.Receiver.PAUSE_TIMER_ACTION);
-                    intent.putExtra(TimerService.Receiver.PAUSE_TIMER_ACTION_INDEX, position);
+                    startPauseTimerActionIntent.setAction(TimerService.PAUSE_TIMER_ACTION);
                 } else {
-                    intent.setAction(TimerService.Receiver.START_TIMER_ACTION);
-                    intent.putExtra(TimerService.Receiver.START_TIMER_ACTION_INDEX, position);
+                    startPauseTimerActionIntent.setAction(TimerService.START_TIMER_ACTION);
                 }
 
-                context.sendBroadcast(intent);
+                startPauseTimerActionIntent.putExtra(TimerService.TIMER_INDEX_EXTRA, timerDatas.indexOf(timerData));
+                context.sendBroadcast(startPauseTimerActionIntent);
             });
         }
     }
@@ -119,11 +111,19 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return (position == timerDatas.size() ? ADD_TIMER_VIEW_TYPE : TIMER_VIEW_TYPE);
     }
 
+    public List<TimerData> getTimerDatas() {
+        return timerDatas;
+    }
+    public void setTimerDatas(List<TimerData> timerDatas) {
+        this.timerDatas = timerDatas;
+    }
+
     public class TimerViewHolder extends RecyclerView.ViewHolder {
         private final SwipeRevealLayout timerSwipeRevealLayout;
         private final ImageView deleteTimer;
         private final ConstraintLayout timerConstraintLayout;
-        private final TextView timerName, time;
+        private final TextView timerName;
+        private final TextView time;
         private final ProgressBar timeProgressBar;
         private final ImageView pauseTimer;
 
@@ -147,20 +147,9 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             ImageView addTimer = itemView.findViewById(R.id.addTimer);
             addTimer.setOnClickListener(e -> {
-                Intent intent = new Intent(context, SetTimerActivity.class);
-                ((MainActivity) context).startActivityForResult(intent, MainActivity.SET_TIMER_REQUEST_CODE);
+                Intent request = new Intent(context, SetTimerActivity.class);
+                ((MainActivity) context).startActivityForResult(request, MainActivity.SET_TIMER_REQUEST_CODE);
             });
-        }
-    }
-
-    public class Receiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(TimerService.UPDATE_ACTION)) {
-                timerDatas = (List<TimerData>) intent.getSerializableExtra(TimerService.TIMER_DATAS);
-
-                notifyDataSetChanged();
-            }
         }
     }
 }

@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
@@ -14,26 +16,53 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import hu.kmatebotond.multitimer.ui.activities.SetTimerActivity;
 import hu.kmatebotond.multitimer.utils.notifications.Notifications;
 
 public class TimerService extends Service {
-    public static final String UPDATE_ACTION = "update_action";
-    public static final String TIMER_DATAS = "timer_datas";
+    public static final String REQUEST_UPDATE_ALL_ACTION = "TimerService.REQUEST_UPDATE_ALL_ACTION";
+    public static final String ADD_TIMER_ACTION = "TimerService.ADD_TIMER_ACTION";
+    public static final String DELETE_TIMER_ACTION = "TimerService.DELETE_TIMER_ACTION";
+    public static final String START_TIMER_ACTION = "TimerService.START_TIMER_ACTION";
+    public static final String PAUSE_TIMER_ACTION = "TimerService.PAUSE_TIMER_ACTION";
+
+    public static final String ON_UPDATE_ALL = "TimerService.ON_UPDATE_ALL";
+    public static final String ON_UPDATE = "TimerService.ON_UPDATE";
+    public static final String ON_TIMER_ADDED = "TimerService.ON_TIMER_ADDED";
+    public static final String ON_TIMER_DELETED = "TimerService.ON_TIMER_DELETED";
+
+    public static final String TIMER_INDEX_EXTRA = "TimerService.TIMER_INDEX_EXTRA";
+    public static final String TIMER_DATA_EXTRA = "TimerService.TIMER_DATA_EXTRA";
 
     private final List<Timer> timers = new ArrayList<>();
+
+    private final Receiver receiver = new Receiver();
+
+    private final HandlerThread backgroundThread = new HandlerThread("TimerService.backgroundThread");
+    private Handler backgroundHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Receiver receiver = new Receiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(TimerService.Receiver.ADD_TIMER_ACTION);
-        filter.addAction(TimerService.Receiver.DELETE_TIMER_ACTION);
-        filter.addAction(TimerService.Receiver.START_TIMER_ACTION);
-        filter.addAction(TimerService.Receiver.PAUSE_TIMER_ACTION);
+        filter.addAction(REQUEST_UPDATE_ALL_ACTION);
+        filter.addAction(ADD_TIMER_ACTION);
+        filter.addAction(DELETE_TIMER_ACTION);
+        filter.addAction(START_TIMER_ACTION);
+        filter.addAction(PAUSE_TIMER_ACTION);
         registerReceiver(receiver, filter);
+
+        backgroundThread.start();
+        backgroundHandler = new Handler(backgroundThread.getLooper());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        unregisterReceiver(receiver);
+
+        backgroundHandler.getLooper().quit();
     }
 
     @Nullable
@@ -42,106 +71,113 @@ public class TimerService extends Service {
         return null;
     }
 
-    private void sendUpdateBroadcast() {
-        Intent intent = new Intent();
-        intent.setAction(UPDATE_ACTION);
-
-        List<TimerData> timerDatas = new ArrayList<>();
-        for (Timer t : timers) {
-            timerDatas.add(t.getTimerData());
-        }
-
-        intent.putExtra(TIMER_DATAS, (Serializable) timerDatas);
-
-        sendBroadcast(intent);
-    }
-
-    private Notification getCorrectTimerNotification(Context context, TimerData timerData) {
-        Notification notification;
-        if (timers.size() > 1) {
-            notification = Notifications.getTimerNotification(context, null);
-        } else {
-            notification = Notifications.getTimerNotification(context, timerData);
-        }
-
-        return notification;
-    }
-
-    private void stopForegroundIfTimersIsEmpty() {
-        if (timers.isEmpty()) {
-            stopForeground(true);
-        }
-    }
-
-    public class Receiver extends BroadcastReceiver {
-        public static final String ADD_TIMER_ACTION = "add_timer_action";
-        public static final String DELETE_TIMER_ACTION = "delete_timer_action";
-        public static final String DELETE_TIMER_ACTION_INDEX = "delete_timer_action_index";
-        public static final String START_TIMER_ACTION = "start_timer_action";
-        public static final String START_TIMER_ACTION_INDEX = "start_timer_action_index";
-        public static final String PAUSE_TIMER_ACTION = "pause_timer_action";
-        public static final String PAUSE_TIMER_ACTION_INDEX = "pause_timer_action_index";
-
+    private class Receiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case ADD_TIMER_ACTION:
-                    TimerData timerData = (TimerData) intent.getSerializableExtra(SetTimerActivity.TIMER_DATA);
+                case REQUEST_UPDATE_ALL_ACTION: {
+                    Intent onUpdateAllIntent = new Intent();
+                    onUpdateAllIntent.setAction(ON_UPDATE_ALL);
+
+                    List<TimerData> timerDatas = new ArrayList<>();
+                    for (Timer t : timers) {
+                        timerDatas.add(t.getTimerData());
+                    }
+                    onUpdateAllIntent.putExtra(TIMER_DATA_EXTRA, (Serializable) timerDatas);
+
+                    sendBroadcast(onUpdateAllIntent);
+
+                    break;
+                }
+                case ADD_TIMER_ACTION: {
+                    TimerData timerData = (TimerData) intent.getSerializableExtra(TIMER_DATA_EXTRA);
                     Timer timer = new Timer(timerData);
                     timer.addTimerListener(new Timer.TimerListener() {
                         @Override
                         public void onTick() {
-                            sendUpdateBroadcast();
+                            TimerData onTickTimerData = timer.getTimerData();
 
-                            Notifications.sendTimerNotification(context, getCorrectTimerNotification(context, timer.getTimerData()));
+                            sendOnUpdateBroadcast(timers.indexOf(timer), onTickTimerData);
+
+                            Notifications.sendTimerNotification(context, getCorrectTimerNotification(context, onTickTimerData));
                         }
 
                         @Override
                         public void onFinish() {
-                            timers.remove(timer);
-
-                            sendUpdateBroadcast();
-
-                            Notifications.sendTimerFinishedNotification(context, timerData);
+                            int i = timers.indexOf(timer);
+                            timers.remove(i);
+                            sendOnTimerDeletedBroadcast(i);
 
                             stopForegroundIfTimersIsEmpty();
+                            Notifications.sendTimerFinishedNotification(context, timerData);
                         }
                     });
                     timers.add(timer);
 
+                    Intent onAddTimerIntent = new Intent();
+                    onAddTimerIntent.setAction(ON_TIMER_ADDED);
+                    onAddTimerIntent.putExtra(TIMER_DATA_EXTRA, timerData);
+                    sendBroadcast(onAddTimerIntent);
+
+                    backgroundHandler.post(timer::start);
+
                     startForeground(Notifications.TIMER_NOTIFICATION_ID, getCorrectTimerNotification(context, timerData));
 
-                    timer.start();
-
                     break;
+                }
                 case DELETE_TIMER_ACTION: {
-                    int i = intent.getIntExtra(DELETE_TIMER_ACTION_INDEX, 0);
-
+                    int i = intent.getIntExtra(TIMER_INDEX_EXTRA, 0);
                     timers.get(i).pause();
                     timers.remove(i);
-
-                    sendUpdateBroadcast();
+                    sendOnTimerDeletedBroadcast(i);
 
                     stopForegroundIfTimersIsEmpty();
 
                     break;
                 }
                 case START_TIMER_ACTION: {
-                    int i = intent.getIntExtra(START_TIMER_ACTION_INDEX, 0);
-
+                    int i = intent.getIntExtra(TIMER_INDEX_EXTRA, 0);
                     timers.get(i).start();
 
                     break;
                 }
                 case PAUSE_TIMER_ACTION: {
-                    int i = intent.getIntExtra(PAUSE_TIMER_ACTION_INDEX, 0);
-
-                    timers.get(i).pause();
-
-                    sendUpdateBroadcast();
+                    int i = intent.getIntExtra(TIMER_INDEX_EXTRA, 0);
+                    Timer timer = timers.get(i);
+                    timer.pause();
+                    sendOnUpdateBroadcast(i, timer.getTimerData());
 
                     break;
                 }
+            }
+        }
+
+        private void sendOnUpdateBroadcast(int index, TimerData timerData) {
+            Intent onUpdateIntent = new Intent();
+            onUpdateIntent.setAction(ON_UPDATE);
+            onUpdateIntent.putExtra(TIMER_INDEX_EXTRA, index);
+            onUpdateIntent.putExtra(TIMER_DATA_EXTRA, timerData);
+            sendBroadcast(onUpdateIntent);
+        }
+
+        private void sendOnTimerDeletedBroadcast(int index) {
+            Intent onTimerDeleted = new Intent();
+            onTimerDeleted.setAction(ON_TIMER_DELETED);
+            onTimerDeleted.putExtra(TIMER_INDEX_EXTRA, index);
+            sendBroadcast(onTimerDeleted);
+        }
+
+        private Notification getCorrectTimerNotification(Context context, TimerData timerData) {
+            if (timers.size() > 1) {
+                timerData = null;
+            }
+
+            return Notifications.getTimerNotification(context, timerData);
+        }
+
+        private void stopForegroundIfTimersIsEmpty() {
+            if (timers.isEmpty()) {
+                stopForeground(true);
             }
         }
     }
