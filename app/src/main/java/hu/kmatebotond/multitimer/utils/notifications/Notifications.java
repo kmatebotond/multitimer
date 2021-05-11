@@ -67,7 +67,7 @@ public class Notifications {
         String timerName = timerData.getTimerName();
         String maxSeconds = timerData.getFormattedMaxSeconds();
         builder.setContentTitle((timerName.isEmpty() ? "" : (timerName + " - ")) + maxSeconds);
-        
+
         builder.setContentText(context.getResources().getString(R.string.timer_finished));
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
