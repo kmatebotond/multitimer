@@ -1,7 +1,5 @@
 package hu.kmatebotond.multitimer.timer;
 
-import androidx.annotation.NonNull;
-
 import java.io.Serializable;
 
 public class TimerData implements Serializable {

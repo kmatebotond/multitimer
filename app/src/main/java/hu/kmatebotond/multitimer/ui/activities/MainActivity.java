@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RecyclerView timers = findViewById(R.id.timers);
+        RecyclerView timers = findViewById(R.id.activityMain_timers);
         adapter = new TimerAdapter(this);
         timers.setAdapter(adapter);
         timers.setLayoutManager(new LinearLayoutManager(this));
@@ -66,14 +66,12 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == SET_TIMER_REQUEST_CODE) {
-            if (resultCode == SetTimerActivity.SET_TIMER_RESULT_CODE) {
-                Intent addTimerActionIntent = new Intent();
-                addTimerActionIntent.setAction(TimerService.ADD_TIMER_ACTION);
-
-                TimerData timerData = (TimerData) data.getSerializableExtra(SetTimerActivity.TIMER_DATA_EXTRA);
-                addTimerActionIntent.putExtra(TimerService.TIMER_DATA_EXTRA, timerData);
-
-                sendBroadcast(addTimerActionIntent);
+            if (resultCode == SetTimerActivity.RESULT_CODE) {
+                Intent addTimerAction = new Intent();
+                addTimerAction.setAction(TimerService.ADD_TIMER_ACTION);
+                TimerData timerData = (TimerData) data.getSerializableExtra(TimerService.TIMER_DATA_EXTRA);
+                addTimerAction.putExtra(TimerService.TIMER_DATA_EXTRA, timerData);
+                sendBroadcast(addTimerAction);
             }
         }
     }

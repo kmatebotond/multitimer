@@ -39,9 +39,9 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public TimerAdapter(Context context) {
         this.context = context;
 
-        Intent requestUpdateAllActionIntent = new Intent();
-        requestUpdateAllActionIntent.setAction(TimerService.REQUEST_UPDATE_ALL_ACTION);
-        context.sendBroadcast(requestUpdateAllActionIntent);
+        Intent requestUpdateAllAction = new Intent();
+        requestUpdateAllAction.setAction(TimerService.REQUEST_UPDATE_ALL_ACTION);
+        context.sendBroadcast(requestUpdateAllAction);
     }
 
     @NonNull
@@ -66,37 +66,38 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             TimerViewHolder timerViewHolder = (TimerViewHolder) holder;
             TimerData timerData = timerDatas.get(position);
 
-            viewBinderHelper.bind(timerViewHolder.timerSwipeRevealLayout, timerData.getId() + "");
+            viewBinderHelper.bind(timerViewHolder.swipeRevealLayout, timerData.getId() + "");
 
-            timerViewHolder.deleteTimer.setOnClickListener(e -> {
-                Intent deleteTimerActionIntent = new Intent();
-                deleteTimerActionIntent.setAction(TimerService.DELETE_TIMER_ACTION);
-                deleteTimerActionIntent.putExtra(TimerService.TIMER_INDEX_EXTRA, timerDatas.indexOf(timerData));
-                context.sendBroadcast(deleteTimerActionIntent);
+            timerViewHolder.deleteTimer.setOnClickListener(v -> {
+                Intent deleteTimerAction = new Intent();
+                deleteTimerAction.setAction(TimerService.DELETE_TIMER_ACTION);
+                deleteTimerAction.putExtra(TimerService.TIMER_INDEX_EXTRA, timerDatas.indexOf(timerData));
+                context.sendBroadcast(deleteTimerAction);
             });
 
             if (timerData.isRunning()) {
-                timerViewHolder.timerConstraintLayout.setAlpha(1);
+                timerViewHolder.constraintLayout.setAlpha(1);
             } else {
-                timerViewHolder.timerConstraintLayout.setAlpha(0.33f);
+                timerViewHolder.constraintLayout.setAlpha(0.33f);
             }
 
             timerViewHolder.timerName.setText(timerData.getTimerName());
             timerViewHolder.time.setText(timerData.getFormattedTotalSeconds());
-            timerViewHolder.timeProgressBar.setMax(timerData.getMaxSeconds() - 1);
-            timerViewHolder.timeProgressBar.setProgress(timerData.getMaxSeconds() - timerData.getTotalSeconds());
+            timerViewHolder.progressBar.setMax(timerData.getMaxSeconds() - 1);
+            timerViewHolder.progressBar.setProgress(timerData.getMaxSeconds() - timerData.getTotalSeconds());
 
-            timerViewHolder.pauseTimer.setOnClickListener(e -> {
-                Intent startPauseTimerActionIntent = new Intent();
-
+            timerViewHolder.pauseTimer.setOnClickListener(v -> {
+                Intent startPauseTimerAction = new Intent();
                 if (timerData.isRunning()) {
-                    startPauseTimerActionIntent.setAction(TimerService.PAUSE_TIMER_ACTION);
+                    startPauseTimerAction.setAction(TimerService.PAUSE_TIMER_ACTION);
                 } else {
-                    startPauseTimerActionIntent.setAction(TimerService.START_TIMER_ACTION);
+                    startPauseTimerAction.setAction(TimerService.START_TIMER_ACTION);
                 }
+                startPauseTimerAction.putExtra(TimerService.TIMER_INDEX_EXTRA, timerDatas.indexOf(timerData));
+                context.sendBroadcast(startPauseTimerAction);
 
-                startPauseTimerActionIntent.putExtra(TimerService.TIMER_INDEX_EXTRA, timerDatas.indexOf(timerData));
-                context.sendBroadcast(startPauseTimerActionIntent);
+
+
             });
         }
     }
@@ -119,25 +120,25 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public class TimerViewHolder extends RecyclerView.ViewHolder {
-        private final SwipeRevealLayout timerSwipeRevealLayout;
+        private final SwipeRevealLayout swipeRevealLayout;
         private final ImageView deleteTimer;
-        private final ConstraintLayout timerConstraintLayout;
+        private final ConstraintLayout constraintLayout;
         private final TextView timerName;
         private final TextView time;
-        private final ProgressBar timeProgressBar;
+        private final ProgressBar progressBar;
         private final ImageView pauseTimer;
 
         public TimerViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            timerSwipeRevealLayout = itemView.findViewById(R.id.timerSwipeRevealLayout);
-            deleteTimer = itemView.findViewById(R.id.deleteTimer);
-            timerConstraintLayout = itemView.findViewById(R.id.timerConstraintLayout);
-            timerName = itemView.findViewById(R.id.timerName);
-            time = itemView.findViewById(R.id.time);
-            timeProgressBar = itemView.findViewById(R.id.timerProgressBar);
-            timeProgressBar.setMin(Timer.MIN);
-            pauseTimer = itemView.findViewById(R.id.pauseTimer);
+            swipeRevealLayout = itemView.findViewById(R.id.timer_swipeRevealLayout);
+            deleteTimer = itemView.findViewById(R.id.timer_deleteTimer);
+            constraintLayout = itemView.findViewById(R.id.timer_constraintLayout);
+            timerName = itemView.findViewById(R.id.timer_timerName);
+            time = itemView.findViewById(R.id.timer_time);
+            progressBar = itemView.findViewById(R.id.timer_progressBar);
+            progressBar.setMin(Timer.MIN);
+            pauseTimer = itemView.findViewById(R.id.timer_pauseTimer);
         }
     }
 
@@ -145,10 +146,10 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         public AddTimerViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            ImageView addTimer = itemView.findViewById(R.id.addTimer);
-            addTimer.setOnClickListener(e -> {
-                Intent request = new Intent(context, SetTimerActivity.class);
-                ((MainActivity) context).startActivityForResult(request, MainActivity.SET_TIMER_REQUEST_CODE);
+            ImageView addTimer = itemView.findViewById(R.id.addTimer_addTimer);
+            addTimer.setOnClickListener(v -> {
+                Intent setTimerRequest  = new Intent(context, SetTimerActivity.class);
+                ((MainActivity) context).startActivityForResult(setTimerRequest, MainActivity.SET_TIMER_REQUEST_CODE);
             });
         }
     }

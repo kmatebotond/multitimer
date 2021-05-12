@@ -21,6 +21,7 @@ import hu.kmatebotond.multitimer.utils.notifications.Notifications;
 public class TimerService extends Service {
     public static final String REQUEST_UPDATE_ALL_ACTION = "TimerService.REQUEST_UPDATE_ALL_ACTION";
     public static final String ADD_TIMER_ACTION = "TimerService.ADD_TIMER_ACTION";
+    public static final String EDIT_TIMER_ACTION = "TimerService.EDIT_TIMER_ACTION";
     public static final String DELETE_TIMER_ACTION = "TimerService.DELETE_TIMER_ACTION";
     public static final String START_TIMER_ACTION = "TimerService.START_TIMER_ACTION";
     public static final String PAUSE_TIMER_ACTION = "TimerService.PAUSE_TIMER_ACTION";
@@ -47,6 +48,7 @@ public class TimerService extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(REQUEST_UPDATE_ALL_ACTION);
         filter.addAction(ADD_TIMER_ACTION);
+        filter.addAction(EDIT_TIMER_ACTION);
         filter.addAction(DELETE_TIMER_ACTION);
         filter.addAction(START_TIMER_ACTION);
         filter.addAction(PAUSE_TIMER_ACTION);
@@ -76,16 +78,7 @@ public class TimerService extends Service {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case REQUEST_UPDATE_ALL_ACTION: {
-                    Intent onUpdateAllIntent = new Intent();
-                    onUpdateAllIntent.setAction(ON_UPDATE_ALL);
-
-                    List<TimerData> timerDatas = new ArrayList<>();
-                    for (Timer t : timers) {
-                        timerDatas.add(t.getTimerData());
-                    }
-                    onUpdateAllIntent.putExtra(TIMER_DATA_EXTRA, (Serializable) timerDatas);
-
-                    sendBroadcast(onUpdateAllIntent);
+                    sendOnUpdateAllBroadcast();
 
                     break;
                 }
@@ -96,7 +89,6 @@ public class TimerService extends Service {
                         @Override
                         public void onTick() {
                             TimerData onTickTimerData = timer.getTimerData();
-
                             sendOnUpdateBroadcast(timers.indexOf(timer), onTickTimerData);
 
                             Notifications.sendTimerNotification(context, getCorrectTimerNotification(context, onTickTimerData));
@@ -113,15 +105,20 @@ public class TimerService extends Service {
                         }
                     });
                     timers.add(timer);
-
-                    Intent onAddTimerIntent = new Intent();
-                    onAddTimerIntent.setAction(ON_TIMER_ADDED);
-                    onAddTimerIntent.putExtra(TIMER_DATA_EXTRA, timerData);
-                    sendBroadcast(onAddTimerIntent);
+                    sendOnTimerAddedBroadcast(timerData);
 
                     backgroundHandler.post(timer::start);
 
                     startForeground(Notifications.TIMER_NOTIFICATION_ID, getCorrectTimerNotification(context, timerData));
+
+                    break;
+                }
+                case EDIT_TIMER_ACTION : {
+                    int i = intent.getIntExtra(TIMER_INDEX_EXTRA, 0);
+                    Timer timer = timers.get(i);
+                    TimerData timerData = (TimerData) intent.getSerializableExtra(TIMER_DATA_EXTRA);
+                    timer.getTimerData().setTimerName(timerData.getTimerName());
+                    sendOnUpdateBroadcast(i, timer.getTimerData());
 
                     break;
                 }
@@ -152,12 +149,30 @@ public class TimerService extends Service {
             }
         }
 
+        private void sendOnUpdateAllBroadcast() {
+            Intent onUpdateAll = new Intent();
+            onUpdateAll.setAction(ON_UPDATE_ALL);
+            List<TimerData> timerDatas = new ArrayList<>();
+            for (Timer t : timers) {
+                timerDatas.add(t.getTimerData());
+            }
+            onUpdateAll.putExtra(TIMER_DATA_EXTRA, (Serializable) timerDatas);
+            sendBroadcast(onUpdateAll);
+        }
+
         private void sendOnUpdateBroadcast(int index, TimerData timerData) {
             Intent onUpdateIntent = new Intent();
             onUpdateIntent.setAction(ON_UPDATE);
             onUpdateIntent.putExtra(TIMER_INDEX_EXTRA, index);
             onUpdateIntent.putExtra(TIMER_DATA_EXTRA, timerData);
             sendBroadcast(onUpdateIntent);
+        }
+
+        private void sendOnTimerAddedBroadcast(TimerData timerData) {
+            Intent onAddTimer = new Intent();
+            onAddTimer.setAction(ON_TIMER_ADDED);
+            onAddTimer.putExtra(TIMER_DATA_EXTRA, timerData);
+            sendBroadcast(onAddTimer);
         }
 
         private void sendOnTimerDeletedBroadcast(int index) {
