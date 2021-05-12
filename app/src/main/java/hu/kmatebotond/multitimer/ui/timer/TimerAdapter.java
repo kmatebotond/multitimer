@@ -148,8 +148,7 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             ImageView addTimer = itemView.findViewById(R.id.addTimer_addTimer);
             addTimer.setOnClickListener(v -> {
-                Intent setTimerRequest  = new Intent(context, SetTimerActivity.class);
-                ((MainActivity) context).startActivityForResult(setTimerRequest, MainActivity.SET_TIMER_REQUEST_CODE);
+                ((MainActivity) context).startSetTimerActivityForResult();
             });
         }
     }

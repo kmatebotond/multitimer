@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import hu.kmatebotond.multitimer.utils.notifications.Notifications;
 public class MainActivity extends AppCompatActivity {
     public static final int SET_TIMER_REQUEST_CODE = 1;
 
+    private RecyclerView timers;
     private TimerAdapter adapter;
 
     private final Receiver receiver = new Receiver();
@@ -31,11 +33,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RecyclerView timers = findViewById(R.id.activityMain_timers);
+        timers = findViewById(R.id.activityMain_timers);
         adapter = new TimerAdapter(this);
         timers.setAdapter(adapter);
         timers.setLayoutManager(new LinearLayoutManager(this));
         timers.setItemAnimator(null);
+
+        if (adapter.getTimerDatas().isEmpty()) {
+            startSetTimerActivityForResult();
+        }
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(TimerService.ON_TIMER_ADDED);
@@ -73,7 +79,14 @@ public class MainActivity extends AppCompatActivity {
                 addTimerAction.putExtra(TimerService.TIMER_DATA_EXTRA, timerData);
                 sendBroadcast(addTimerAction);
             }
+
+            timers.setVisibility(View.VISIBLE);
         }
+    }
+
+    public void startSetTimerActivityForResult() {
+        Intent setTimerRequest  = new Intent(this, SetTimerActivity.class);
+        startActivityForResult(setTimerRequest, SET_TIMER_REQUEST_CODE);
     }
 
     private class Receiver extends BroadcastReceiver {
