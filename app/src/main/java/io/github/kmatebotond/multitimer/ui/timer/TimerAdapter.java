@@ -1,4 +1,4 @@
-package hu.kmatebotond.multitimer.ui.timer;
+package io.github.kmatebotond.multitimer.ui.timer;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,12 +19,11 @@ import com.chauthai.swipereveallayout.ViewBinderHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-import hu.kmatebotond.multitimer.R;
-import hu.kmatebotond.multitimer.timer.Timer;
-import hu.kmatebotond.multitimer.timer.TimerData;
-import hu.kmatebotond.multitimer.timer.TimerService;
-import hu.kmatebotond.multitimer.ui.activities.MainActivity;
-import hu.kmatebotond.multitimer.ui.activities.SetTimerActivity;
+import io.github.kmatebotond.multitimer.R;
+import io.github.kmatebotond.multitimer.timer.Timer;
+import io.github.kmatebotond.multitimer.timer.TimerData;
+import io.github.kmatebotond.multitimer.timer.TimerService;
+import io.github.kmatebotond.multitimer.ui.activities.MainActivity;
 
 public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int TIMER_VIEW_TYPE = 1;
@@ -83,7 +82,7 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             timerViewHolder.timerName.setText(timerData.getTimerName());
             timerViewHolder.time.setText(timerData.getFormattedTotalSeconds());
-            timerViewHolder.progressBar.setMax(timerData.getMaxSeconds() - 1);
+            timerViewHolder.progressBar.setMax(timerData.getMaxSeconds());
             timerViewHolder.progressBar.setProgress(timerData.getMaxSeconds() - timerData.getTotalSeconds());
 
             timerViewHolder.pauseTimer.setOnClickListener(v -> {
@@ -147,9 +146,7 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             super(itemView);
 
             ImageView addTimer = itemView.findViewById(R.id.addTimer_addTimer);
-            addTimer.setOnClickListener(v -> {
-                ((MainActivity) context).startSetTimerActivityForResult();
-            });
+            addTimer.setOnClickListener(v -> ((MainActivity) context).startSetTimerActivityForResult());
         }
     }
 }

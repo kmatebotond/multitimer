@@ -1,4 +1,4 @@
-package hu.kmatebotond.multitimer.utils.notifications;
+package io.github.kmatebotond.multitimer.utils.notifications;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -16,9 +16,9 @@ import android.net.Uri;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import hu.kmatebotond.multitimer.R;
-import hu.kmatebotond.multitimer.timer.TimerData;
-import hu.kmatebotond.multitimer.timer.TimerService;
+import io.github.kmatebotond.multitimer.R;
+import io.github.kmatebotond.multitimer.timer.TimerData;
+import io.github.kmatebotond.multitimer.timer.TimerService;
 
 public class Notifications {
     private static final String TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION = "Notifications.TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION";

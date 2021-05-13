@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activities.SetTimerActivity">
+    tools:context="io.github.kmatebotond.multitimer.ui.activities.SetTimerActivity">
 
     <EditText
         android:id="@+id/activitySetTimer_timerName"
@@ -87,7 +87,6 @@
             android:id="@+id/activitySetTimer_setTimer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:background="@android:color/holo_green_dark"
             android:padding="16dp"
             app:srcCompat="@drawable/outline_done_24"

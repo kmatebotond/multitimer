@@ -1,4 +1,4 @@
-package hu.kmatebotond.multitimer.timer;
+package io.github.kmatebotond.multitimer.timer;
 
 import java.io.Serializable;
 

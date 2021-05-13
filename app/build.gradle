@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "hu.kmatebotond.multitimer"
+        applicationId "io.github.kmatebotond.multitimer"
         minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
