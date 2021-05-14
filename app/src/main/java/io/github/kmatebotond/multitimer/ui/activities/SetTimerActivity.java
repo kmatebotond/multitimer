@@ -26,10 +26,10 @@ public class SetTimerActivity extends AppCompatActivity {
 
     public static boolean IS_RUNNING = false;
 
-    private ImageView cancelSetTimer;
     private NumberPicker setHours;
     private NumberPicker setMinutes;
     private NumberPicker setSeconds;
+    private ImageView cancelSetTimer;
 
     private boolean canBack;
 

@@ -94,9 +94,6 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
                 startPauseTimerAction.putExtra(TimerService.TIMER_INDEX_EXTRA, timerDatas.indexOf(timerData));
                 context.sendBroadcast(startPauseTimerAction);
-
-
-
             });
         }
     }
