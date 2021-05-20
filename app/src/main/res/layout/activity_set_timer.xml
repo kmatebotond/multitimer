@@ -80,7 +80,7 @@
             android:layout_marginEnd="16dp"
             android:background="@color/design_default_color_error"
             android:padding="16dp"
-            app:srcCompat="@drawable/outline_close_24"
+            app:srcCompat="@drawable/baseline_close_24"
             app:tint="?android:attr/windowBackground" />
 
         <ImageView
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/holo_green_dark"
             android:padding="16dp"
-            app:srcCompat="@drawable/outline_done_24"
+            app:srcCompat="@drawable/baseline_done_24"
             app:tint="?android:attr/windowBackground" />
     </LinearLayout>
 

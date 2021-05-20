@@ -85,7 +85,12 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             timerViewHolder.progressBar.setMax(timerData.getMaxSeconds());
             timerViewHolder.progressBar.setProgress(timerData.getMaxSeconds() - timerData.getTotalSeconds());
 
-            timerViewHolder.pauseTimer.setOnClickListener(v -> {
+            if (timerData.isRunning()) {
+                timerViewHolder.startPauseTimer.setImageResource(R.drawable.baseline_pause_24);
+            } else {
+                timerViewHolder.startPauseTimer.setImageResource(R.drawable.baseline_play_arrow_24);
+            }
+            timerViewHolder.startPauseTimer.setOnClickListener(v -> {
                 Intent startPauseTimerAction = new Intent();
                 if (timerData.isRunning()) {
                     startPauseTimerAction.setAction(TimerService.PAUSE_TIMER_ACTION);
@@ -122,7 +127,7 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         private final TextView timerName;
         private final TextView time;
         private final ProgressBar progressBar;
-        private final ImageView pauseTimer;
+        private final ImageView startPauseTimer;
 
         public TimerViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -134,7 +139,7 @@ public class TimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             time = itemView.findViewById(R.id.timer_time);
             progressBar = itemView.findViewById(R.id.timer_progressBar);
             progressBar.setMin(Timer.MIN);
-            pauseTimer = itemView.findViewById(R.id.timer_pauseTimer);
+            startPauseTimer = itemView.findViewById(R.id.timer_startPauseTimer);
         }
     }
 

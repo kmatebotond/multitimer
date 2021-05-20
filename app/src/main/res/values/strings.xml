@@ -4,7 +4,6 @@
     <string name="set_timer_name_hint">Timer name</string>
     <string name="separator_text">:</string>
     <string name="timer_set_to_zero_text">Timer cannot be set to zero.</string>
-    <string name="can_back_false_text">Set a timer first!</string>
 
     <string name="timer_notification_channel">Timer</string>
     <string name="timer_finished_notification_channel">Timer finished</string>

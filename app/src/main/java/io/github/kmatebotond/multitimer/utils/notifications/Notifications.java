@@ -58,7 +58,7 @@ public class Notifications {
 
     public static Notification getTimerNotification(Context context, TimerData timerData) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, TIMER_NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(R.drawable.outline_hourglass_bottom_24);
+        builder.setSmallIcon(R.drawable.baseline_hourglass_bottom_24);
         if (timerData == null) {
             builder.setContentTitle(context.getResources().getString(R.string.multiple_timers_notification_title));
         } else {
@@ -67,7 +67,7 @@ public class Notifications {
             Intent deleteTimerAction = new Intent();
             deleteTimerAction.setAction(TimerService.DELETE_TIMER_ACTION);
             deleteTimerAction.putExtra(TimerService.TIMER_INDEX_EXTRA, 0);
-            builder.addAction(R.drawable.outline_delete_24, context.getResources().getString(R.string.delete_timer_action_text), PendingIntent.getBroadcast(context, 0, deleteTimerAction, 0));
+            builder.addAction(R.drawable.baseline_delete_24, context.getResources().getString(R.string.delete_timer_action_text), PendingIntent.getBroadcast(context, 0, deleteTimerAction, 0));
         }
         Intent mainActivity = new Intent(context, MainActivity.class);
         mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -84,7 +84,7 @@ public class Notifications {
 
     public static void sendTimerFinishedNotification(Context context, TimerData timerData) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, TIMER_FINISHED_NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(R.drawable.outline_hourglass_bottom_24);
+        builder.setSmallIcon(R.drawable.baseline_hourglass_bottom_24);
         String timerName = timerData.getTimerName();
         String maxSeconds = timerData.getFormattedMaxSeconds();
         builder.setContentTitle((timerName.isEmpty() ? "" : (timerName + " - ")) + maxSeconds);
