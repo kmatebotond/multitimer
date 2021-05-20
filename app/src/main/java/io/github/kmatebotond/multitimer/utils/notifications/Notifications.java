@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat;
 import io.github.kmatebotond.multitimer.R;
 import io.github.kmatebotond.multitimer.timer.TimerData;
 import io.github.kmatebotond.multitimer.timer.TimerService;
+import io.github.kmatebotond.multitimer.ui.activities.MainActivity;
 
 public class Notifications {
     private static final String TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION = "Notifications.TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION";
@@ -65,7 +67,11 @@ public class Notifications {
             deleteTimerAction.putExtra(TimerService.TIMER_INDEX_EXTRA, 0);
             builder.addAction(R.drawable.outline_delete_24, context.getResources().getString(R.string.delete_timer_action_text), PendingIntent.getBroadcast(context, 0, deleteTimerAction, 0));
         }
-
+        Intent mainActivity = new Intent(context, MainActivity.class);
+        mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addNextIntent(mainActivity);
+        builder.setContentIntent(stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT));
         return builder.build();
     }
 

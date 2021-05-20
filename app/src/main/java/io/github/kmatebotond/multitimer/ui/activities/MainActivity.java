@@ -66,8 +66,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startSetTimerActivityForResult() {
-        Intent setTimerRequest = new Intent(this, SetTimerActivity.class);
-        startActivityForResult(setTimerRequest, 0);
+        Intent setTimerActivity = new Intent(this, SetTimerActivity.class);
+        setTimerActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivityForResult(setTimerActivity, 0);
     }
 
     private class Receiver extends BroadcastReceiver {
@@ -106,14 +107,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 case TimerService.TIMER_COUNT: {
                     int count = intent.getIntExtra(TimerService.TIMER_COUNT_EXTRA, 0);
-                    if (!SetTimerActivity.IS_RUNNING) {
-                        if (count == 0) {
-                            startSetTimerActivityForResult();
-                        } else {
-                            timers.setVisibility(View.VISIBLE);
-                        }
+                    if (count == 0) {
+                        startSetTimerActivityForResult();
+                    } else {
+                        timers.setVisibility(View.VISIBLE);
                     }
-
                     break;
                 }
             }

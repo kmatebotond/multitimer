@@ -24,8 +24,6 @@ public class SetTimerActivity extends AppCompatActivity {
     private static final String SET_MINUTES_SAVED_INSTANCE_STATE = "SetTimerActivity.SET_MINUTES_SAVED_INSTANCE_STATE";
     private static final String SET_SECONDS_SAVED_INSTANCE_STATE = "SetTimerActivity.SET_SECONDS_SAVED_INSTANCE_STATE";
 
-    public static boolean IS_RUNNING = false;
-
     private NumberPicker setHours;
     private NumberPicker setMinutes;
     private NumberPicker setSeconds;
@@ -39,8 +37,6 @@ public class SetTimerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_timer);
-
-        IS_RUNNING = true;
 
         NumberPicker.Formatter formatter = value -> String.format("%02d", value);
         setHours = findViewById(R.id.activitySetTimer_setHours);
@@ -102,15 +98,6 @@ public class SetTimerActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (isFinishing()) {
-            IS_RUNNING = false;
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -123,7 +110,7 @@ public class SetTimerActivity extends AppCompatActivity {
         if (canBack) {
             super.onBackPressed();
         } else {
-            Toast.makeText(this, R.string.can_back_false_text, Toast.LENGTH_SHORT).show();
+            finishAffinity();
         }
     }
 
