@@ -23,7 +23,8 @@ import io.github.kmatebotond.multitimer.timer.TimerService;
 import io.github.kmatebotond.multitimer.ui.activities.MainActivity;
 
 public class Notifications {
-    private static final String TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION = "Notifications.TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION";
+    private static final String TIMER_FINISHED_NOTIFICATION_CONTENT_ACTION = "Notifications.TIER_FINISHED_NOTIFICATION_CONTENT_ACTION";
+    private static final String TIMER_FINISHED_NOTIFICATION_DELETE_ACTION = "Notifications.TIMER_FINISHED_NOTIFICATION_DELETE_ACTION";
 
     public static final String TIMER_NOTIFICATION_CHANNEL_ID = "Notifications.TIMER_NOTIFICATION_CHANNEL_ID";
     public static final String TIMER_FINISHED_NOTIFICATION_CHANNEL_ID = "Notifications.TIMER_FINISHED_NOTIFICATION_CHANNEL_ID";
@@ -50,7 +51,8 @@ public class Notifications {
         ringtone.setStreamType(AudioManager.STREAM_ALARM);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION);
+        filter.addAction(TIMER_FINISHED_NOTIFICATION_CONTENT_ACTION);
+        filter.addAction(TIMER_FINISHED_NOTIFICATION_DELETE_ACTION);
         context.registerReceiver(new Receiver(), filter);
     }
 
@@ -87,9 +89,12 @@ public class Notifications {
         String maxSeconds = timerData.getFormattedMaxSeconds();
         builder.setContentTitle((timerName.isEmpty() ? "" : (timerName + " - ")) + maxSeconds);
         builder.setContentText(context.getResources().getString(R.string.timer_finished_notification_text));
-        Intent timerFinishedNotificationClearedAction = new Intent();
-        timerFinishedNotificationClearedAction.setAction(TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION);
-        builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, timerFinishedNotificationClearedAction, 0));
+        Intent timerFinishedNotificationContentAction = new Intent();
+        timerFinishedNotificationContentAction.setAction(TIMER_FINISHED_NOTIFICATION_CONTENT_ACTION);
+        builder.setContentIntent(PendingIntent.getBroadcast(context, 0, timerFinishedNotificationContentAction, 0));
+        Intent timerFinishedNotificationDeleteAction = new Intent();
+        timerFinishedNotificationDeleteAction.setAction(TIMER_FINISHED_NOTIFICATION_DELETE_ACTION);
+        builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, timerFinishedNotificationDeleteAction, 0));
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(TIMER_FINISHED_NOTIFICATION_ID, builder.build());
@@ -106,8 +111,15 @@ public class Notifications {
     private static class Receiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(TIMER_FINISHED_NOTIFICATION_CLEARED_ACTION)) {
-                ringtone.stop();
+            switch (intent.getAction()) {
+                case TIMER_FINISHED_NOTIFICATION_CONTENT_ACTION: {
+                    cancelNotification(context, TIMER_FINISHED_NOTIFICATION_ID);
+                }
+                case TIMER_FINISHED_NOTIFICATION_DELETE_ACTION: {
+                    ringtone.stop();
+
+                    break;
+                }
             }
         }
     }
