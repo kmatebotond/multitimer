@@ -25,7 +25,7 @@ public class TimerService extends Service {
     public static final String DELETE_TIMER_ACTION = "TimerService.DELETE_TIMER_ACTION";
     public static final String START_TIMER_ACTION = "TimerService.START_TIMER_ACTION";
     public static final String PAUSE_TIMER_ACTION = "TimerService.PAUSE_TIMER_ACTION";
-    public static final String REQUEST_TIMER_COUNT_ACTION = "TimerService.REQUEST_TIMER_COUNT";
+    public static final String REQUEST_TIMER_COUNT_ACTION = "TimerService.REQUEST_TIMER_COUNT_ACTION";
 
     public static final String ON_UPDATE_ALL = "TimerService.ON_UPDATE_ALL";
     public static final String ON_UPDATE = "TimerService.ON_UPDATE";
