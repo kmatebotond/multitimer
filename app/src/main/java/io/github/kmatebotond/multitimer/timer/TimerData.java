@@ -51,10 +51,10 @@ public class TimerData implements Serializable {
         return getFormattedTime(totalSeconds);
     }
     private String getFormattedTime(int seconds) {
-        int hours = seconds / 60 / 60;
-        seconds -= hours * 60 * 60;
-        int minutes = seconds / 60;
-        seconds -= minutes * 60;
+        int hours = seconds / (Timer.SECONDS_MAX + 1) / (Timer.MINUTES_MAX + 1);
+        seconds -= hours * (Timer.MINUTES_MAX + 1) * (Timer.SECONDS_MAX + 1);
+        int minutes = seconds / (Timer.SECONDS_MAX + 1);
+        seconds -= minutes * (Timer.SECONDS_MAX + 1);
 
         String hoursString = String.format("%02d", hours);
         String minutesString = String.format("%02d", minutes);

@@ -57,7 +57,7 @@ public class SetTimerActivity extends AppCompatActivity {
 
         ImageView setTimer = findViewById(R.id.activitySetTimer_setTimer);
         setTimer.setOnClickListener(v -> {
-            int totalSeconds = setHours.getValue() * 60 * 60 + setMinutes.getValue() * 60 + setSeconds.getValue();
+            int totalSeconds = setHours.getValue() * (Timer.MINUTES_MAX + 1) * (Timer.SECONDS_MAX + 1) + setMinutes.getValue() * (Timer.SECONDS_MAX + 1) + setSeconds.getValue();
             if (totalSeconds != 0) {
                 Intent addTimerAction = new Intent();
                 addTimerAction.setAction(TimerService.ADD_TIMER_ACTION);
