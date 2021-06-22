@@ -85,8 +85,11 @@ public class MainActivity extends AppCompatActivity {
                 case TimerService.ON_UPDATE: {
                     int i = intent.getIntExtra(TimerService.TIMER_INDEX_EXTRA, 0);
                     TimerData timerData = (TimerData) intent.getSerializableExtra(TimerService.TIMER_DATA_EXTRA);
-                    adapter.getTimerDatas().set(i, timerData);
-                    adapter.notifyItemChanged(i);
+                    List<TimerData> timerDatas = adapter.getTimerDatas();
+                    if (!timerDatas.isEmpty()) {
+                        timerDatas.set(i, timerData);
+                        adapter.notifyItemChanged(i);
+                    }
 
                     break;
                 }
